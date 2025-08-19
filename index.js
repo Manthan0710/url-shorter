@@ -20,8 +20,9 @@ mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017', {
 }).then(c => console.log(`DB connect  to ${c.connection.host} `))
     .catch(e => console.log(e));
 
+
 // Serve HTML file on "/"
-app.get('/', (req, res) => {
+app.get('/api/get', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
