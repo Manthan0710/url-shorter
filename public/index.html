@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>URL Shortener</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0d0d0d;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    .container {
+      background-color: #1a1a1a;
+      padding: 2rem;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+      color: #e0e0e0;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    input[type="url"] {
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background-color: #121212;
+      color: #ffffff;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 0.8rem;
+      font-size: 1rem;
+      background-color: #6c63ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #574fd6;
+    }
+
+    .result {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: #121212;
+      border-radius: 8px;
+    }
+
+    .result a {
+      color: #00cec9;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .result a:hover {
+      text-decoration: underline;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .status {
+      margin-top: 1rem;
+      color: #ff7675;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>URL Shortener</h1>
+
+    <form id="shortenForm">
+      <input type="url" id="longUrl" placeholder="Paste your long URL here" required />
+      <div class="btn-group">
+        <button type="submit">Shorten</button>
+        <button type="button" id="showStatsBtn">Show Stats</button>
+      </div>
+    </form>
+
+    <div class="result">
+      <div id="shortUrlResult"></div>
+      <div id="statsResult" style="margin-top: 1rem;"></div>
+      <div id="statusMessage" class="status"></div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("shortenForm");
+    const showStatsBtn = document.getElementById("showStatsBtn");
+    const shortUrlResult = document.getElementById("shortUrlResult");
+    const statsResult = document.getElementById("statsResult");
+    const statusMessage = document.getElementById("statusMessage");
+
+    let lastShortCode = null;
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const longUrl = document.getElementById("longUrl").value;
+
+      try {
+        const res = await fetch("/shorten", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ url: longUrl })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.shortUrl) {
+          shortUrlResult.innerHTML = `Short URL: <a href="${data.shortUrl}" target="_blank">${data.shortUrl}</a>`;
+          statsResult.innerHTML = "";
+          statusMessage.textContent = "";
+          lastShortCode = data.shortUrl.split("/").pop();
+        } else {
+          shortUrlResult.innerHTML = "";
+          statsResult.innerHTML = "";
+          statusMessage.textContent = "Failed to shorten URL. Try again.";
+        }
+      } catch (err) {
+        shortUrlResult.innerHTML = "";
+        statsResult.innerHTML = "";
+        statusMessage.textContent = "Error connecting to server.";
+      }
+    });
+
+    showStatsBtn.addEventListener("click", async () => {
+      if (!lastShortCode) {
+        statusMessage.textContent = "Please shorten a URL first.";
+        return;
+      }
+
+      try {
+        const res = await fetch(`/stats/${lastShortCode}`);
+        const data = await res.json();
+
+        if (res.ok && data.noOfHits !== undefined) {
+          statsResult.innerHTML = `<strong>Hits:</strong> ${data.noOfHits}`;
+          statusMessage.textContent = "";
+        } else {
+          statsResult.innerHTML = "";
+          statusMessage.textContent = "Failed to fetch stats.";
+        }
+      } catch (err) {
+        statsResult.innerHTML = "";
+        statusMessage.textContent = "Error connecting to server.";
+      }
+    });
+  </script>
+</body>
+</html>
