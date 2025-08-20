@@ -4,6 +4,8 @@ import { fileURLToPath } from 'url';
 import  urlRoutes  from "./routes/urlRoutes.js";
 import mongoose from "mongoose";
 
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8000;
