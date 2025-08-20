@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 // Needed for ES modules to get __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,6 +23,7 @@ mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017', {
 
 // Serve HTML file on "/"
 app.get('/api/get', (req, res) => {
+  console.log('check')
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -30,6 +31,6 @@ app.use('/',urlRoutes);
 
 
 
-app.listen(process.env.PORT||8000, () => {
+app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
