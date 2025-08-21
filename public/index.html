@@ -126,7 +126,7 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const longUrl = document.getElementById("longUrl").value;
-
+      console.log(longUrl)
       try {
         const res = await fetch("/shorten", {
           method: "POST",
@@ -135,7 +135,7 @@
           },
           body: JSON.stringify({ url: longUrl })
         });
-
+        console.log(res.json);
         const data = await res.json();
         if (res.ok && data.shortUrl) {
           shortUrlResult.innerHTML = `Short URL: <a href="${data.shortUrl}" target="_blank">${data.shortUrl}</a>`;
@@ -151,6 +151,7 @@
         shortUrlResult.innerHTML = "";
         statsResult.innerHTML = "";
         statusMessage.textContent = "Error connecting to server.";
+        console.log(err)
       }
     });
 
